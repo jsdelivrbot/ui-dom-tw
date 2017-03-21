@@ -1,42 +1,82 @@
 
 var stage = new Konva.Stage({
     container: 'canvas',
-    width: 250,
-    height: 150
+    width: 1600,
+    height: 350
 });
 
 var layer = new Konva.Layer();
-
-var test = new Konva.Rect({
-    x: 20,
-    y: 30,
-    fill: "pink",
-    width: 100,
-    height: 100,
-    clicked: false,
-    id: 44
+var text = new Konva.Text({
+    x: 10,
+    y: 10,
+    fontFamily: 'Calibri',
+    fontSize: 20,
+    text: '',
+    fill: 'black'
 });
 
-var test2 = new Konva.Rect({
-    x: 150,
-    y: 30,
-    fill: "yellow",
-    width: 100,
-    height: 100,
-    clicked: false,
-    id: 45
+var colors = ["pink", "yellow", "green", "orange", "blue","red"]
+
+function getRandomColor() {
+    var availableColors = colors.length-1;
+    return colors[Math.round(Math.random() * availableColors)];
+}
+
+for (var i = 1; i <= 10; i += 1) {
+    var names = []
+    names[i-1] = "shape" + i;
+     names[i-1] = new Konva.Rect({
+        x: (120 * i) + 20,
+        y: 30,
+        fill: getRandomColor(),
+        width: 100,
+        height: 180,
+        id: i
+    });
+    layer.add(names[i-1]);
+   
+}
+
+
+layer.on("click tap", function (evt) {
+
+    //alert(evt.target.getId())
+    writeMessage('Selected card is ' + evt.target.fill() + " with ID " + evt.target.id());
+
+
+    storeCards(evt);
+    if (isSecond()) {
+        // alert(cards[0].target.getId() + ' ' + cards[1].target.getId());
+        if (checkSameType(cards) && !checkIfFlipped(cards)) {
+            destroy(cards)
+        }
+        cards = [];
+    }
+
+    //removeCards(evt.target);
+
 });
 
 
-layer.on("click dbltap", function (evt) {
+//write message function
+function writeMessage(message) {
+    text.setText(message);
+    layer.draw();
+}
 
-    //alert(evt.target.getId)
-    removeCards(evt.target);
+//function to check if current card is already flipped
 
-});
+function checkIfFlipped(cards) {
+    var firstCardColor = cards[0].target.id();
+    var secondCardColor = cards[1].target.id();
 
+    if (firstCardColor === secondCardColor) {
+        return true;
+    }
+}
 
-var rellay = (function () {
+//switches every even click on a different card
+var isSecond = (function () {
     var called = true;
     return function () {
         if (called === true) {
@@ -49,35 +89,36 @@ var rellay = (function () {
     }
 })();
 
-function removeCards(card) {
-    var cards = [];
+
+//function to store two cards
+var cards = [];
+function storeCards(card) {
     cards.push(card);
 
-    if (rellay()) {
-        if (cards[0].getId === card.getId) {
-            return;
-        }
-        if (cardsAreDestroyable(cards[0], cards[1])) {
-            alert(cards[0].getId())
-            cards[0].destroy();
-            cards[1].destroy();
-            layer.draw()
-        }
+}
 
+//function to check if cards are the same type
+function checkSameType(cards) {
+    var firstCardColor = cards[0].target.fill();
+    var secondCardColor = cards[1].target.fill();
+
+    if (firstCardColor === secondCardColor) {
+        return true;
     }
-
-}
-function cardsAreDestroyable(first, second) {
-    return true;
 }
 
+//destroy cards
 
-
-/*test2.on("dblclick dbltap", function () {
-    this.destroy();
+function destroy(cards) {
+    cards[1].target.destroy();
     layer.draw();
-});*/
+    cards[0].target.destroy();
+    layer.draw();
+    return this;
+}
 
-layer.add(test);
-layer.add(test2);
-stage.add(layer);
+
+
+
+layer.add(text);
+ stage.add(layer);
